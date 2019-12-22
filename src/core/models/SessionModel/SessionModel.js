@@ -6,7 +6,6 @@ class SessionModel {
 
     @computed get moneyPerHour() {
         const money = this.totalMoney / (this.playingTime / 1000 / 60 / 60) || 0;
-        console.log(money);
         return Math.floor(money);
     }
 
@@ -19,7 +18,7 @@ class SessionModel {
     }
 
     @action sessionTick = async () => {
-        this.playingTime = new Date().getTime() - this.startTime + 300000;
+        this.playingTime = new Date().getTime() - this.startTime;
     }
 }
 

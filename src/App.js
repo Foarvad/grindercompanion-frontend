@@ -18,7 +18,7 @@ const mapStateToProps = ({ App }) => ({
 const App = ({ tick }) => {
     useEffect(() => {
         setInterval(tick, 1000);
-        console.log(`App reloaded at ${new Date().getMinutes()}`);
+        console.log(`App initialized at ${new Date()}`);
     }, []);
 
     return (

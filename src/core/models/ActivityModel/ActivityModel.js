@@ -8,49 +8,53 @@ class ActivityModel {
 
     @observable logs = [];
 
-    @observable jobTypes = {
+    @observable jobType = {
         vip: {
-            primaryCooldown: 60000,
-            secondaryCooldown: 30000,
+            primaryCooldown: 600000,
+            secondaryCooldown: 300000,
         },
         client: {
-            primaryCooldown: 120000,
-            secondaryCooldown: 60000,
+            primaryCooldown: 1800000,
+            secondaryCooldown: 300000,
         },
     };
 
-    @observable jobs = {
-        hh: {
+    @observable jobs = [
+        {
+            id: 'hh',
             name: 'Headhunter',
             type: 'vip',
             cooldown: 0,
             unlockedAt: 0,
         },
-        ss: {
+        {
+            id: 'ss',
             name: 'Sightseer',
             type: 'vip',
             cooldown: 0,
             unlockedAt: 0,
         },
-        ds: {
+        {
+            id: 'ds',
             name: 'Diamond shopping',
             type: 'client',
             cooldown: 0,
             unlockedAt: 0,
         },
-        rp: {
+        {
+            id: 'rp',
             name: 'Robbery in Progress',
             type: 'client',
             cooldown: 0,
             unlockedAt: 0,
         },
-    };
+    ];
 
     @action activityTick = async () => {
         if (this.activeCooldowns.length === 0) return;
         const currentTime = new Date().getTime();
         this.activeCooldowns.forEach(jobId => {
-            const job = this.jobs[jobId];
+            const job = this.getJob(jobId);
             const cooldown = job.unlockedAt - currentTime;
             if (cooldown > 0) {
                 job.cooldown = cooldown;
@@ -66,37 +70,52 @@ class ActivityModel {
     }
 
     @action setCooldown(id, cooldown) {
-        this.jobs[id].cooldown = cooldown;
-        this.jobs[id].unlockedAt = new Date().getTime() + cooldown;
+        const job = this.getJob(id);
+        job.cooldown = cooldown;
+        job.unlockedAt = new Date().getTime() + cooldown;
         this.activeCooldowns.push(id);
     }
 
     @action finishJob = (id, money) => {
-        const finishedJob = this.jobs[id];
+        const finishedJob = this.getJob(id);
         if (!finishedJob || finishedJob.cooldown !== 0) return;
 
-        const jobType = this.jobTypes[finishedJob.type];
+        const jobType = this.jobType[finishedJob.type];
         if (!jobType) return;
 
         const { primaryCooldown, secondaryCooldown } = jobType;
 
         SessionModel.addMoney(money);
         this.setCooldown(id, primaryCooldown);
-        this.addLog(id, money);
-        for (let jobId in this.jobs) {
-            const job = this.jobs[jobId];
-            if (job.type === finishedJob.type && job.cooldown === 0) {
-                this.setCooldown(jobId, secondaryCooldown);
+        this.addLog({
+            id,
+            name: finishedJob.name,
+        }, money);
+        this.jobs.forEach(({ id, type, cooldown }) => {
+            if (type === finishedJob.type && cooldown === 0) {
+                this.setCooldown(id, secondaryCooldown);
             }
-        }
+        });
     }
 
-    @action addLog(id, money) {
+    @action finishOtherActivity = (money) => {
+        SessionModel.addMoney(money);
+        this.addLog({
+            id: 'other',
+            name: 'Other activity',
+        }, money);
+    }
+
+    @action addLog(activity, money) {
         this.logs.push({
-            id,
+            ...activity,
             money,
             time: new Date().getTime(),
         });
+    }
+
+    getJob = (id) => {
+        return this.jobs.find(({ id : _id }) => id === _id);
     }
 }
 

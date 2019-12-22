@@ -28,7 +28,6 @@ class SessionStats extends Component {
                     <span className="playingTime">Playing time: {humanizeDuration(playingTime, 'hh:mm:ss')}</span>
                     <span className="totalMoney">Total money: <span className="money">${totalMoney}</span></span>
                     <span className="moneyPerHour">Money per hour: <span className="money">${moneyPerHour}</span></span>
-                    {logs.map(({ id, money, time }, index)=> <div key={index}>id: {id}, money: {money}, time: {time}</div>)}
                 </Body>
             </Wrapper>
         );
@@ -41,6 +40,7 @@ const Wrapper = styled.div`
     display: flex;
     flex-direction: column;
     background-color: #000;
+    width: 100%;
     color: #fff;
     span {
         font-size: 20px;
