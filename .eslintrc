@@ -1,0 +1,65 @@
+{
+  "extends": ["eslint:recommended", "plugin:react/recommended"],
+  "parser": "babel-eslint",
+  "parserOptions": {
+      "ecmaVersion": 2018,
+      "ecmaFeatures": {
+          "jsx": true
+      },
+      "sourceType": "module"
+  },
+  "env": {
+      "browser": true,
+      "jest": true,
+      "es6": true,
+      "node": true
+  },
+  "settings": {
+      "import/resolver": {
+          "node": {
+              "paths": ["src"]
+          }
+      },
+      "react": {
+          "version": "detect"
+      }
+  },
+  "plugins": ["import"],
+  "rules": {
+      "strict": 2,
+      "linebreak-style": ["error", "unix"],
+      "indent": ["error", 4],
+      "react/jsx-indent": ["error", 4],
+      "react/jsx-indent-props": ["error", 4],
+      "quotes": ["error", "single"],
+      "object-curly-spacing": ["error", "always"],
+      "no-console": "off",
+      "react/no-unused-prop-types": "error",
+      "react/no-unused-state": "error",
+      "no-trailing-spaces": "error",
+      "lines-between-class-members": ["error", "always"],
+      "comma-dangle": ["error", "always-multiline"],
+      "semi": ["error", "always"],
+      "import/newline-after-import": [
+          "error",
+          {
+              "count": 2
+          }
+      ],
+      "object-curly-newline": [
+          "error",
+          {
+              "consistent": true
+          }
+      ],
+
+      "react/no-find-dom-node": "off",
+      "react/display-name": "off",
+      "eol-last": [
+          "error",
+          "always"
+      ],
+      "no-unused-vars": "off",
+      "react/prop-types": "off"
+  }
+}
