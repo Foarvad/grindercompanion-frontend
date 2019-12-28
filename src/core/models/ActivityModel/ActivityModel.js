@@ -1,11 +1,9 @@
-import { observable, action } from 'mobx';
+import { observable, action, computed } from 'mobx';
 
 import { SessionModel } from '../SessionModel';
 
 
 class ActivityModel {
-    @observable activeCooldowns = [];
-
     @observable logs = [];
 
     @observable jobType = {
@@ -51,37 +49,37 @@ class ActivityModel {
     ];
 
     @action activityTick = async () => {
-        if (this.activeCooldowns.length === 0) return;
+        if (this.jobsWithCooldown === 0) return;
         const currentTime = new Date().getTime();
-        this.activeCooldowns.forEach(jobId => {
-            const job = this.getJob(jobId);
+        this.jobsWithCooldown.forEach(job => {
             const cooldown = job.unlockedAt - currentTime;
             if (cooldown > 0) {
                 job.cooldown = cooldown;
             } else {
                 job.cooldown = 0;
-                this.removeCooldown(jobId);
             }
         });
-    }
-
-    @action removeCooldown = (id) => {
-        this.activeCooldowns = this.activeCooldowns.filter(_id => _id !== id);
     }
 
     @action setCooldown(id, cooldown) {
         const job = this.getJob(id);
         job.cooldown = cooldown;
         job.unlockedAt = new Date().getTime() + cooldown;
-        this.activeCooldowns.push(id);
     }
 
     @action finishJob = (id, money) => {
+        // Try to get finished job by id and insure that is has no cooldown
         const finishedJob = this.getJob(id);
-        if (!finishedJob || finishedJob.cooldown !== 0) return;
+        if (!finishedJob || finishedJob.cooldown !== 0) {
+            console.error('Cannot get finished job by id');
+            return;
+        }
 
+        // Try to get job type
         const jobType = this.jobType[finishedJob.type];
-        if (!jobType) return;
+        if (!jobType) {
+            console.error(`Job with id "${finishedJob.id}" has invalid job type`);
+        }
 
         const { primaryCooldown, secondaryCooldown } = jobType;
 
@@ -91,6 +89,8 @@ class ActivityModel {
             id,
             name: finishedJob.name,
         }, money);
+
+        // Set cooldowns for all jobs in group
         this.jobs.forEach(({ id, type, cooldown }) => {
             if (type === finishedJob.type && cooldown === 0) {
                 this.setCooldown(id, secondaryCooldown);
@@ -107,6 +107,7 @@ class ActivityModel {
     }
 
     @action addLog(activity, money) {
+        // Add activity data, money and timestamp to logs
         this.logs.push({
             ...activity,
             money,
@@ -114,8 +115,12 @@ class ActivityModel {
         });
     }
 
+    @computed get jobsWithCooldown() {
+        return this.jobs.filter(job => job.cooldown !== 0);
+    }
+
     getJob = (id) => {
-        return this.jobs.find(({ id : _id }) => id === _id);
+        return this.jobs.find((job) => job.id === id);
     }
 }
 

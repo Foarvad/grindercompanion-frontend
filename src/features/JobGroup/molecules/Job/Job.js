@@ -10,7 +10,7 @@ import { TextInput } from '@ui';
 const Job = ({ job, finishJob }) => {
     const { id, name, cooldown } = job;
     const [isOpened, setOpened] = useState(false);
-    const [moneyEarned, setMoney] = useState('');
+    const [moneyEarned, setMoney] = useState(0);
 
     const handleToggleOpen = () => {
         setOpened(!isOpened);
